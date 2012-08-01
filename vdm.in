@@ -11,8 +11,6 @@ set -eux
 
 previous_tag_file='.vdm_previous_tag'
 previous_tag_file_legacy='.svn_previous_tag'
-upstream_wc='upstream'
-project_wc='project'
 svn_load_dirs='bin/svn_load_dirs'
 
 # Migrate from older vdm versions

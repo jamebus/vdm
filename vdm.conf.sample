@@ -2,6 +2,13 @@
 # vdm.conf -- Configuration file for vdm
 #
 
+# Upstream working copy directory. Normally upstream is fine.
+upstream_wc='upstream'
+
+# Project working copy directory. Normally you want this to be project, the
+# name of your branch, or trunk.
+project_wc='project'
+
 # Full URI of upstream project.
 upstream_uri='svn://svn.freebsd.org/base/stable/9'
 
