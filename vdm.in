@@ -3,6 +3,7 @@
 # Vendor Drop Merge
 # TIP: ./vdm 2>&1 | tee vdm.log
 #
+@LICENSE@
 
 set -eux
 
