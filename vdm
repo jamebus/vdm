@@ -1,0 +1,82 @@
+#!/bin/sh
+#
+# Vendor Drop Merge
+# TIP: ./vdm 2>&1 | tee vdm.log
+#
+
+set -eux
+
+. vdm.conf
+
+previous_tag_file='.vdm_previous_tag'
+previous_tag_file_legacy='.svn_previous_tag'
+upstream_wc='upstream'
+project_wc='project'
+svn_load_dirs='bin/svn_load_dirs'
+
+# Migrate from older vdm versions
+test -f "$previous_tag_file_legacy" -a ! -f "$previous_tag_file" && mv "$previous_tag_file_legacy" "$previous_tag_file"
+
+previous_tag=$(cat "$previous_tag_file")
+
+becho () {
+	set +x
+	echo
+	echo ---------------------------------------------------------------------------
+	echo "* $1"
+	echo ---------------------------------------------------------------------------
+	echo
+	set -x
+}
+
+becho 'Updating upstream wc'
+
+# Migrate from cvsup-based upstream
+test -d "${upstream_wc}/sup" && rm -rf "$upstream_wc"
+if [ -d "${upstream_wc}/.svn" ]; then
+	if [ "$(svn info "$upstream_wc" | awk '/^URL: / { print $2 }')" = "$upstream_uri" ]; then
+		svn up "$upstream_wc"
+	else
+		svn switch "$upstream_uri" "$upstream_wc"
+	fi
+else
+	svn co "$upstream_uri" "$upstream_wc"
+fi
+
+tag="${vendor_drop_dir}-$(date -u +%Y%m%d%H%M%S)-r$(svn info "$upstream_wc" | awk '/^Last Changed Rev: / { print $4 }')"
+
+becho 'Importing vendor drop'
+
+env TMPDIR="$(pwd)" "$svn_load_dirs" -no_user_input -t "$tag" \
+                                     -glob_ignores '' \
+                                     "${svnroot_uri}/vendor/${project_root}" \
+                                     "$vendor_drop_dir" "$upstream_wc"
+
+becho "Updating project wc"
+
+if [ -d "$project_wc" ]; then
+	if [ "$(svn info "$project_wc" | awk '/^URL: / { print $2 }')" = "${svnroot_uri}/${project_root}/branches/${branch}" ]; then
+		svn up "$project_wc"
+	else
+		svn switch "${svnroot_uri}/${project_root}/branches/${branch}" "$project_wc"
+	fi
+else
+	svn co "${svnroot_uri}/${project_root}/branches/${branch}" "$project_wc"
+fi
+
+echo "$tag" > "$previous_tag_file"
+
+becho 'Merging vendor drop'
+
+svn merge "${svnroot_uri}/vendor/${project_root}/${previous_tag}" \
+          "${svnroot_uri}/vendor/${project_root}/${tag}" \
+          "${project_wc}/${wc_drop_dir}"
+
+becho 'Committing merge'
+
+svn commit -m"Vendor drop merge $previous_tag - $tag to $branch" \
+           "${project_wc}/${wc_drop_dir}"
+
+becho 'Vendor drop merge complete'
+
+exit

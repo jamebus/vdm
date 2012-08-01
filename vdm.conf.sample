@@ -1,0 +1,26 @@
+#
+# vdm.conf -- Configuration file for vdm
+#
+
+# Full URI of upstream project.
+upstream_uri='svn://svn.freebsd.org/base/stable/9'
+
+# URI of local repository root. Vendor directory is expected to be at
+# ${svnroot_uri}/vendor
+svnroot_uri='file:///u/svn'
+
+# Project root. This must contain trunk, branches, and tags
+# directories. ${svnroot_uri}/${project_root}
+project_root='FreeBSD/src'
+
+# Branch. ${svnroot_uri}/${project_root}/branches/${branch}
+branch='releng_9'
+
+# Drop directory within project's wc. Can be empty.
+# ${svnroot_uri}/${project_root}/branches/${branch}/${drop_dir}
+wc_drop_dir='src'
+
+# Vendor drop directory. Normally you want $branch (if upstream uses branches)
+# or current (branchless repo like FreeBSD ports).
+# ${svnroot_uri}/vendor/${project_root}/${vendor_drop_dir}
+vendor_drop_dir="$branch"
