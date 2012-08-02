@@ -2,32 +2,48 @@
 # vdm.conf -- Configuration file for vdm
 #
 
+#
+# Upstream
+#
+
 # Upstream working copy directory. Normally upstream is fine.
 upstream_wc='upstream'
+
+# Full URI of upstream project.
+upstream_uri='svn://svn.freebsd.org/base/releng/9.1'
+
+#
+# Project
+#
 
 # Project working copy directory. Normally you want this to be project, the
 # name of your branch, or trunk.
 project_wc='project'
 
-# Full URI of upstream project.
-upstream_uri='svn://svn.freebsd.org/base/stable/9'
-
 # URI of local repository root. Vendor directory is expected to be at
 # ${svnroot_uri}/vendor
 svnroot_uri='file:///u/svn'
 
-# Project root. This must contain trunk, branches, and tags
-# directories. ${svnroot_uri}/${project_root}
-project_root='FreeBSD/src'
+# Path to project root.
+# ${svnroot_uri}/${project_root_path}
+project_root_path='FreeBSD/src'
 
-# Branch. ${svnroot_uri}/${project_root}/branches/${branch}
-branch='releng_9'
+# Path to project branch. branches/foo, trunk, head, releng/9.1
+# ${svnroot_uri}/${project_root_path}/${project_branch_path}
+project_branch_path='branches/releng_9.1'
 
-# Drop directory within project's wc. Can be empty.
-# ${svnroot_uri}/${project_root}/branches/${branch}/${drop_dir}
-wc_drop_dir='src'
+# Path under $project_branch_path to merge vendor drop to. Can be empty if you
+# want to merge it directly into $project_branch_path.
+# ${svnroot_uri}/${project_root_path}/${project_branch_path}/${project_vendor_merge_path}
+project_vendor_merge_path='src'
 
-# Vendor drop directory. Normally you want $branch (if upstream uses branches)
-# or current (branchless repo like FreeBSD ports).
-# ${svnroot_uri}/vendor/${project_root}/${vendor_drop_dir}
-vendor_drop_dir="$branch"
+#
+# Vendor drop
+#
+
+# Vendor drop path. If upstream uses branches, use their branch name. If
+# upstream uses a branchless repo, trunk, current, or head, whatever makes
+# sense. It doesn't really matter as long it doesn't collide with another
+# vendor drops.
+# ${svnroot_uri}/vendor/${project_root_path}/${vendor_drop_path}
+vendor_drop_path='releng_9.1'

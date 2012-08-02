@@ -42,39 +42,40 @@ else
 	svn co "$upstream_uri" "$upstream_wc"
 fi
 
-tag="${vendor_drop_dir}-$(date -u +%Y%m%d%H%M%S)-r$(svn info "$upstream_wc" | awk '/^Last Changed Rev: / { print $4 }')"
+tag="${vendor_drop_path}-$(date -u +%Y%m%d%H%M%S)-r$(svn info "$upstream_wc" | awk '/^Last Changed Rev: / { print $4 }')"
 
 becho 'Importing vendor drop'
 
-env TMPDIR="$(pwd)" "$svn_load_dirs" -no_user_input -t "$tag" \
-                                     -glob_ignores '' \
-                                     "${svnroot_uri}/vendor/${project_root}" \
-                                     "$vendor_drop_dir" "$upstream_wc"
+env TMPDIR="$(pwd)" \
+  "$svn_load_dirs" -no_user_input -t "$tag" \
+                   -glob_ignores '' \
+                   "${svnroot_uri}/vendor/${project_root_path}" \
+                   "$vendor_drop_path" "$upstream_wc"
 
 becho "Updating project wc"
 
 if [ -d "$project_wc" ]; then
-	if [ "$(svn info "$project_wc" | awk '/^URL: / { print $2 }')" = "${svnroot_uri}/${project_root}/branches/${branch}" ]; then
+	if [ "$(svn info "$project_wc" | awk '/^URL: / { print $2 }')" = "${svnroot_uri}/${project_root_path}/${project_branch_path}" ]; then
 		svn up "$project_wc"
 	else
-		svn switch "${svnroot_uri}/${project_root}/branches/${branch}" "$project_wc"
+		svn switch "${svnroot_uri}/${project_root_path}/${project_branch_path}" "$project_wc"
 	fi
 else
-	svn co "${svnroot_uri}/${project_root}/branches/${branch}" "$project_wc"
+	svn co "${svnroot_uri}/${project_root_path}/${project_branch_path}" "$project_wc"
 fi
 
 echo "$tag" > "$previous_tag_file"
 
 becho 'Merging vendor drop'
 
-svn merge "${svnroot_uri}/vendor/${project_root}/${previous_tag}" \
-          "${svnroot_uri}/vendor/${project_root}/${tag}" \
-          "${project_wc}/${wc_drop_dir}"
+svn merge "${svnroot_uri}/vendor/${project_root_path}/${previous_tag}" \
+          "${svnroot_uri}/vendor/${project_root_path}/${tag}" \
+          "${project_wc}/${project_vendor_merge_path}"
 
 becho 'Committing merge'
 
-svn commit -m"Vendor drop merge $previous_tag - $tag to $branch" \
-           "${project_wc}/${wc_drop_dir}"
+svn commit -m"Vendor drop merge $previous_tag - $tag to $project_branch_path" \
+           "${project_wc}/${project_vendor_merge_path}"
 
 becho 'Vendor drop merge complete'
 
